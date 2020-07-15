@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- JAVA와 연결할 Mapper 파일 설정 -->
+<mapper namespace="poly.persistance.mapper.MemberMapper">
+	<!-- insert, update, delete, select -->
+	
+	<insert id="insertMember" parameterType="poly.dto.MemberDTO">
+		INSERT INTO user_info
+		(
+			USER_MAIL,
+			USER_NAME,
+			PASSWORD,
+			USER_AUTH,
+			REG_DT,
+			user_authCode
+			
+		)
+		VALUES
+		(
+			#{id},
+			#{member_name},
+			#{password},
+			"user",
+			now(),
+			#{user_authCode}
+		)
+	</insert>
+	
+	<select id="getAllMember" resultType="MemberDTO">
+		SELECT USER_NO,
+			   USER_MAIL,
+       		   USER_NAME,
+       		   USER_AUTH,
+       		   REG_DT
+  	      FROM user_info
+	</select>
+	
+	<select id="getMemberOne" parameterType="string" resultType="MemberDTO">
+		SELECT USER_NO,
+			   USER_MAIL,
+       		   USER_NAME,
+       		   USER_AUTH,
+       		   REG_DT
+  	      FROM user_info
+		 WHERE USER_NO = #{memberId}
+	</select>
+	
+	<delete id="deleteMember" parameterType="string">
+		DELETE 
+		FROM user_info 
+		WHERE USER_MAIL = #{id}
+	</delete>
+	
+	<update id="updateMember" parameterType="MemberDTO">
+		UPDATE user_info
+		   SET USER_NAME = #{member_name},
+		       USER_MAIL = #{id},
+		       PASSWORD = #{password}
+		 WHERE USER_NO = #{member_id}
+	</update>
+	
+	<select id="getUserLogin" parameterType="java.util.HashMap" resultType="MemberDTO">
+		 SELECT 
+				 USER_MAIL,
+				 PASSWORD,
+				 email_state
+				 FROM user_info
+ 		 WHERE USER_MAIL = #{id} 
+ 		 AND PASSWORD = #{password}
+	</select>
+	
+	<select id="getIdChk" parameterType="MemberDTO" resultType="string">
+		
+		SELECT USER_NO
+		FROM user_info
+		WHERE USER_MAIL = #{id}
+		
+	</select>
+	
+	<select id="getSearchList" parameterType="MemberDTO" resultType="MemberDTO">
+		SELECT USER_NO,
+			   USER_MAIL,
+       		   USER_NAME,
+       		   USER_AUTH,
+       		   REG_DT
+  	      FROM user_info
+  	      WHERE USER_MAIL = #{id}
+	</select>
+	
+	<!-- 이메일 인증 -->
+	<select id="getAuth_Code" parameterType="string" resultType="string">
+		SELECT user_authCode
+  	      FROM user_info
+  	      WHERE USER_MAIL = #{id}
+	</select>
+	<update id="updateEmail_state" parameterType="string">
+		UPDATE user_info 
+		SET email_state = "OK"
+		WHERE (USER_MAIL = #{id})
+	</update>
+	
+	<update id="updateKey" parameterType="string">
+		UPDATE user_info 
+		SET user_authCode = #{user_authCode}
+		WHERE (USER_MAIL = #{id})
+	</update>
+	
+	<update id="updatePassword" parameterType="MemberDTO">
+		UPDATE user_info 
+		SET PASSWORD = #{password}
+		WHERE (USER_MAIL = #{id})
+	</update>
+	
+	<select id="getName" parameterType="string" resultType="string">
+		SELECT USER_NAME
+  	      FROM user_info
+  	      WHERE USER_MAIL = #{id}
+	</select>
+</mapper>
+
+
+
+
+

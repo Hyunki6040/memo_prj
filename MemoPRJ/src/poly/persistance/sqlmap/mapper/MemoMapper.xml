@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- JAVA와 연결할 Mapper 파일 설정 -->
+<mapper namespace="poly.persistance.mapper.MemoMapper">
+	
+	<select id="getUser_id" parameterType="string" resultType="string">
+		SELECT USER_NO
+  	      FROM user_info
+		 WHERE USER_MAIL = #{id}
+	</select>
+	
+	<insert id="insertMemo" parameterType="poly.dto.MemoDTO">
+		INSERT INTO memo_table
+		(
+			user_id,
+			contents,
+			reg_dt,
+			memo_state,
+			memo_class
+		)
+		VALUES
+		(
+			#{user_id},
+			#{contents},
+			now(),
+			"normal",
+			#{memo_class}
+		)
+	</insert>
+	
+	 <select id="selectMemoList" parameterType="poly.dto.MemoDTO" resultType="poly.dto.MemoDTO">
+        SELECT user_id,
+        MEMO_NO,
+        contents,
+        reg_dt,
+        memo_class
+        FROM memo_table
+        WHERE (user_id = #{user_id} AND memo_state = "normal")
+        ORDER BY reg_dt DESC
+    </select>
+    
+    <select id="searchMemoList" parameterType="poly.dto.MemoDTO" resultType="poly.dto.MemoDTO">
+        SELECT user_id,
+        MEMO_NO,
+        contents,
+        reg_dt,
+        memo_class
+        FROM memo_table
+        WHERE (user_id = #{user_id} AND (contents like CONCAT('%', #{search} , '%') OR memo_class like CONCAT('%', #{search} , '%')) AND memo_state = "normal")
+        ORDER BY reg_dt DESC
+    </select>
+    
+    <select id="selectLabelList" parameterType="string" resultType="poly.dto.MemoDTO">
+        SELECT DISTINCT
+        memo_class
+        FROM memo_table
+        WHERE (user_id = #{user_id} AND memo_state = "normal")
+        ORDER BY reg_dt DESC
+    </select>
+    
+    <select id="deletedMemoList" parameterType="poly.dto.MemoDTO" resultType="poly.dto.MemoDTO">
+        SELECT user_id,
+        MEMO_NO,
+        contents,
+        del_dt,
+        memo_class
+        FROM memo_table
+        WHERE (user_id = #{user_id} AND memo_state= "deleted")
+        ORDER BY reg_dt DESC
+    </select>
+    
+    <select id="selectMemo" parameterType="poly.dto.MemoDTO" resultType="poly.dto.MemoDTO">
+        SELECT user_id,
+        MEMO_NO,
+        contents,
+        reg_dt,
+        memo_class
+        FROM memo_table
+        WHERE (MEMO_NO = #{memo_no} AND user_id = #{user_id})
+    </select>
+    
+    <select id="selectMemoContents" parameterType="poly.dto.MemoDTO" resultType="poly.dto.MemoDTO">
+        SELECT contents
+        FROM memo_table
+        WHERE user_id = #{user_id}
+    </select>
+    
+    <delete id="removeMemo" parameterType="poly.dto.MemoDTO">
+		DELETE 
+		FROM memo_table
+		WHERE (MEMO_NO = #{memo_no} AND user_id = #{user_id});
+	</delete>
+	
+	<update id="deleteMemo" parameterType="poly.dto.MemoDTO">
+		UPDATE memo_table 
+		SET memo_state = "deleted",
+		del_dt = now()
+		WHERE (MEMO_NO = #{memo_no} AND user_id = #{user_id})
+	</update>
+	
+	<update id="recoverMemo" parameterType="poly.dto.MemoDTO">
+		UPDATE memo_table 
+		SET memo_state = "normal",
+		reg_dt = now(),
+		del_dt = NULL
+		WHERE (MEMO_NO = #{memo_no} AND user_id = #{user_id})
+	</update>
+	
+	<update id="modifyMemo" parameterType="poly.dto.MemoDTO">
+		UPDATE memo_table 
+		SET contents = #{contents},
+		reg_dt = now(),
+		memo_class = #{memo_class}
+		WHERE (MEMO_NO = #{memo_no} AND user_id = #{user_id})
+	</update>
+	
+	<delete id="rm_oldMemo" parameterType="string">
+		DELETE 
+		FROM memo_table
+		WHERE ((TO_DAYS(now()) - TO_DAYS(del_dt) >= 10) AND user_id = #{user_id});
+	</delete>
+	
+	<delete id="deleteMemoAll" parameterType="string">
+		DELETE 
+		FROM memo_table
+		WHERE (user_id = #{user_id});
+	</delete>
+</mapper>
